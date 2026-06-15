@@ -118,8 +118,8 @@
             <canvas id="chartRubros"></canvas>
         </div>
 
-        <div class="card">
-            <h3>Análisis de Target por Cliente (Por Vendedor)</h3>
+        <div class="card full-width">
+            <h3>Análisis de Target por Cliente (Ajustado por Vendedores)</h3>
             <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 15px; align-items: center;">
                 <label>Cliente: 
                     <select id="selectClienteTarget"></select>
@@ -128,12 +128,7 @@
                     <input type="number" id="inputVendedores" value="1" min="1" style="width: 60px;">
                 </label>
             </div>
-            <canvas id="chartTargetsCliente"></canvas>
-        </div>
-
-        <div class="card full-width">
-            <h3>Análisis Target Global (Promedio Mensual General vs Objetivo)</h3>
-            <canvas id="chartTargets"></canvas>
+            <canvas id="chartTargetsCliente" height="80"></canvas>
         </div>
 
         <div class="card full-width">
@@ -156,7 +151,7 @@
         }
 
         // ==========================================
-        // 1. Gráfico: Resumen de Clientes (Barra)
+        // 1. Gráfico: Resumen de Clientes
         // ==========================================
         function generarChartClientes(datos) {
             const agrupado = {};
@@ -178,7 +173,7 @@
         }
 
         // ==========================================
-        // 2. Gráfico: Evolución Global (Línea)
+        // 2. Gráfico: Evolución Global
         // ==========================================
         function generarChartEvolucion(datos) {
             const agrupado = {};
@@ -211,7 +206,7 @@
         }
 
         // ==========================================
-        // 3. Gráfico: Composición por Rubro (Doughnut)
+        // 3. Gráfico: Composición por Rubro
         // ==========================================
         function generarChartRubros(datos) {
             const agrupado = {};
@@ -234,64 +229,7 @@
         }
 
         // ==========================================
-        // 4. Gráfico: Análisis Target Mensual Promedio Global
-        // ==========================================
-        function generarChartTargets(datos, targetsDict) {
-            const rubroMes = {};
-            datos.forEach(d => {
-                if (!rubroMes[d.Rubro]) rubroMes[d.Rubro] = new Set();
-                rubroMes[d.Rubro].add(d.Periodo);
-            });
-
-            const rubroCantidades = {};
-            datos.forEach(d => {
-                rubroCantidades[d.Rubro] = (rubroCantidades[d.Rubro] || 0) + d.Cantidad;
-            });
-
-            const labels = [];
-            const dataPromedioMensual = [];
-            const dataTarget = [];
-
-            for (const rubro in targetsDict) {
-                const targetValor = targetsDict[rubro];
-                if (targetValor > 0) { 
-                    const totalVendido = rubroCantidades[rubro] || 0;
-                    const mesesActivos = rubroMes[rubro] ? rubroMes[rubro].size : 1;
-                    const promedio = mesesActivos > 0 ? (totalVendido / mesesActivos) : 0;
-                    
-                    labels.push(rubro);
-                    dataPromedioMensual.push(promedio.toFixed(1));
-                    dataTarget.push(targetValor);
-                }
-            }
-
-            new Chart(document.getElementById('chartTargets'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Promedio Mensual Real (Total Unidades)',
-                            data: dataPromedioMensual,
-                            backgroundColor: '#59a14f'
-                        },
-                        {
-                            label: 'Target Mensual General',
-                            data: dataTarget,
-                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                            type: 'line',
-                            borderColor: '#ff6384',
-                            borderWidth: 2,
-                            borderDash: [5, 5]
-                        }
-                    ]
-                },
-                options: { scales: { y: { grid: {color: '#333'} }, x: { grid: {color: '#333'} } }, plugins: { legend: { labels: { color: '#fff' } } } }
-            });
-        }
-
-        // ==========================================
-        // 5. DINÁMICO: Target por Cliente y Cantidad de Vendedores
+        // 4. DINÁMICO: Target por Cliente y Cantidad de Vendedores
         // ==========================================
         function actualizarChartTargetCliente() {
             if (!datosGlobales || !datosGlobales.ventas || !datosGlobales.targets) return;
@@ -320,9 +258,7 @@
                     const totalVendido = rubroCantidades[rubro] || 0;
                     const mesesActivos = rubroMes[rubro] ? rubroMes[rubro].size : 1;
                     
-                    // Promedio mensual total de la cuenta
                     const promedioMensualTotal = mesesActivos > 0 ? (totalVendido / mesesActivos) : 0;
-                    // Dividido por los vendedores puestos a mano
                     const promedioPorVendedor = promedioMensualTotal / numVendedores;
 
                     labels.push(rubro);
@@ -371,7 +307,7 @@
         }
 
         // ==========================================
-        // 6. Tabla: Clientes en Riesgo
+        // 5. Tabla: Clientes en Riesgo
         // ==========================================
         function generarTablaRiesgo(clientes) {
             const tbody = document.getElementById('bodyRiesgo');
@@ -393,7 +329,7 @@
         }
 
         // ==========================================
-        // 7. Gráfico: Índice de Penetración de Catálogo
+        // 6. Gráfico: Índice de Penetración de Catálogo
         // ==========================================
         function generarChartPenetracion(datos) {
             const ctx = document.getElementById('chartPenetracion').getContext('2d');
@@ -441,14 +377,14 @@
         fetch('datos_dashboard.json')
             .then(response => response.json())
             .then(data => {
-                datosGlobales = data; // Guardamos en memoria global
+                datosGlobales = data; 
 
                 if(data.ventas) {
                     generarChartClientes(data.ventas);
                     generarChartEvolucion(data.ventas);
                     generarChartRubros(data.ventas);
 
-                    // Poblamos el menú desplegable de clientes únicos de forma automática
+                    // Menú desplegable dinámico
                     const clientesUnicos = [...new Set(data.ventas.map(d => d.Cliente))].sort();
                     const select = document.getElementById('selectClienteTarget');
                     select.innerHTML = '';
@@ -456,15 +392,12 @@
                         select.innerHTML += `<option value="${c}">${c}</option>`;
                     });
 
-                    // Escuchamos interacciones para actualizar en tiempo real
+                    // Escuchadores de eventos para actualizar en tiempo real
                     select.addEventListener('change', actualizarChartTargetCliente);
                     document.getElementById('inputVendedores').addEventListener('input', actualizarChartTargetCliente);
 
-                    // Inicializar el reporte dinámico
+                    // Renderizamos el gráfico de Targets por primera vez
                     actualizarChartTargetCliente();
-                }
-                if(data.ventas && data.targets) {
-                    generarChartTargets(data.ventas, data.targets);
                 }
                 if(data.clientes_riesgo) {
                     generarTablaRiesgo(data.clientes_riesgo);
