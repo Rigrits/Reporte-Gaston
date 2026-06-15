@@ -27500,5 +27500,122 @@
             "Dias_Inactividad": 196,
             "Fecha_Ultima": "01/12/2025"
         }
+    ],
+    "penetracion": [
+        {
+            "Cliente": "Estrella",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Difubell",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Markin",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Lema",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Macagnone",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Jorge",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Garofoli",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Pastorini",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Perfucor",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Mena",
+            "Categorias_Compradas": 16,
+            "Penetracion_Porcentaje": 100.0
+        },
+        {
+            "Cliente": "Lizarraga",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "AMDistribuciones",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Guglioti",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Almeida",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Davico",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Yung",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Mazzaroni",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Fambrini",
+            "Categorias_Compradas": 15,
+            "Penetracion_Porcentaje": 93.8
+        },
+        {
+            "Cliente": "Raffi",
+            "Categorias_Compradas": 11,
+            "Penetracion_Porcentaje": 68.8
+        },
+        {
+            "Cliente": "RocioValeria",
+            "Categorias_Compradas": 10,
+            "Penetracion_Porcentaje": 62.5
+        },
+        {
+            "Cliente": "BobbaMax",
+            "Categorias_Compradas": 10,
+            "Penetracion_Porcentaje": 62.5
+        },
+        {
+            "Cliente": "Dietzel",
+            "Categorias_Compradas": 8,
+            "Penetracion_Porcentaje": 50.0
+        },
+        {
+            "Cliente": "Perú",
+            "Categorias_Compradas": 8,
+            "Penetracion_Porcentaje": 50.0
+        }
     ]
 }
