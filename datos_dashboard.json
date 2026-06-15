@@ -19935,5 +19935,82 @@
         "PROMO MENSUAL CAV": 0,
         "PROMOCIONALES": 0,
         "TRATAMIENTO": 0
-    }
+    },
+    "clientes_riesgo": [
+        {
+            "Cliente": "AMDistribuciones",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "BobbaMax",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Davico",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Difubell",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Fambrini",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Garofoli",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Guglioti",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Jorge",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Lizarraga",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Macagnone",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Markin",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Mazzaroni",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Mena",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Pastorini",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        },
+        {
+            "Cliente": "Yung",
+            "Dias_Inactividad": 195,
+            "Fecha_Ultima": "01/12/2025"
+        }
+    ]
 }
