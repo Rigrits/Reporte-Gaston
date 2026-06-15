@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Vanguard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --bg-color: #f4f7fa; --card-bg: #ffffff; --text-main: #333; --accent: #2F5597; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
+        header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); }
+        h1 { margin: 0; color: var(--accent); }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
+        .card { background-color: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; }
+        .card.full-width { grid-column: 1 / -1; }
+        canvas { max-height: 350px; width: 100%; }
+        .control-panel { width: 100%; text-align: center; margin-bottom: 15px; }
+        .selectors-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        select, input[type="number"] { padding: 8px 15px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; font-weight: bold; color: var(--accent); cursor: pointer; background-color: #fff; outline: none; max-width: 300px; }
+        input[type="number"] { border-color: #E65100; color: #E65100; text-align: center; width: 70px; }
+        .label-control { font-size: 14px; font-weight: bold; color: #666; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Vanguard | Análisis de Salidas y Targets Mensuales</h1>
+        <p>Seguimiento de cuotas mensuales y evolución de mercado.</p>
+    </header>
+
+    <div class="grid-container">
+        <div class="card"><canvas id="chartClientes"></canvas></div>
+        <div class="card"><canvas id="chartEvolucion"></canvas></div>
+
+        <div class="card"><canvas id="chartTopRubros"></canvas></div>
+        <div class="card">
+            <div class="control-panel">
+                <span style="font-size: 16px; font-weight: bold; color: #666;">Composición por Cliente</span>
+                <div class="selectors-container"><select id="selectCliente"></select></div>
+            </div>
+            <canvas id="chartComposicion"></canvas>
+        </div>
+
+        <div class="card full-width">
+            <div class="control-panel">
+                <span style="font-size: 18px; font-weight: bold; color: #2F5597;">Evaluación de Objetivo Mensual (Target por Vendedor)</span>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">Ajuste la cantidad de vendedores para calcular la venta real promedio por persona y auditar el objetivo.</p>
+                <div class="selectors-container">
+                    <span class="label-control">Cliente:</span>
+                    <select id="selectClienteTarget"></select>
+                    
+                    <span class="label-control" style="margin-left: 10px;">Producto:</span>
+                    <select id="selectRubroTarget"></select>
+                    
+                    <span class="label-control" style="color: #E65100; margin-left: 20px;">Cant. Vendedores:</span>
+                    <input type="number" id="inputVendedores" value="1" min="1" step="1">
+                </div>
+            </div>
+            <canvas id="chartTargets"></canvas>
+        </div>
+
+        <div class="card full-width"><canvas id="chartInteranual"></canvas></div>
+    </div>
+
+    <script>
+        fetch('datos_dashboard.json')
+            .then(response => response.json())
+            .then(data => {
+                const ventas = data.ventas;
+                const targets = data.targets;
+
+                generarGraficoClientes(ventas);
+                generarGraficoEvolucion(ventas);
+                generarGraficoTopRubros(ventas);
+                generarGraficoComposicionCliente(ventas);
+                generarGraficoInteranual(ventas);
+                
+                // Ejecutamos el reporte mensual con el nuevo parámetro de vendedores
+                generarGraficoTargetsMensual(ventas, targets);
+            })
+            .catch(error => console.error("Error cargando los datos:", error));
+
+        function generarGraficoClientes(data) {
+            const totales = {}; data.forEach(item => totales[item.Cliente] = (totales[item.Cliente] || 0) + item.Cantidad);
+            const sortedClientes = Object.keys(totales).sort((a, b) => totales[b] - totales[a]);
+            new Chart(document.getElementById('chartClientes'), { type: 'bar', data: { labels: sortedClientes, datasets: [{ label: 'Total Comprado', data: sortedClientes.map(c => totales[c]), backgroundColor: '#2F5597', borderRadius: 4 }] }, options: { responsive: true, plugins: { title: { display: true, text: 'Resumen por Clientes', font: { size: 16 } } } } });
+        }
+
+        function generarGraficoEvolucion(data) {
+            const totales = {}; data.forEach(item => totales[item.Periodo] = (totales[item.Periodo] || 0) + item.Cantidad);
+            const sortedPeriodos = Object.keys(totales).sort((a, b) => { const [mA, yA] = a.split('/'); const [mB, yB] = b.split('/'); return new Date(yA, mA - 1) - new Date(yB, mB - 1); });
+            new Chart(document.getElementById('chartEvolucion'), { type: 'line', data: { labels: sortedPeriodos, datasets: [{ label: 'Tendencia Global', data: sortedPeriodos.map(p => totales[p]), borderColor: '#E65100', backgroundColor: 'rgba(230, 81, 0, 0.1)', fill: true, tension: 0.3 }] }, options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Mensual Global', font: { size: 16 } } } } });
+        }
+
+        function generarGraficoTopRubros(data) {
+            const totales = {}; data.forEach(item => totales[item.Rubro] = (totales[item.Rubro] || 0) + item.Cantidad);
+            const topRubros = Object.keys(totales).sort((a, b) => totales[b] - totales[a]).slice(0, 10);
+            new Chart(document.getElementById('chartTopRubros'), { type: 'bar', data: { labels: topRubros, datasets: [{ label: 'Cantidad', data: topRubros.map(r => totales[r]), backgroundColor: '#4CAF50', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, plugins: { title: { display: true, text: 'Top 10 Rubros', font: { size: 16 } } } } });
+        }
+
+        let chartComposicionInstance = null;
+        function generarGraficoComposicionCliente(data) {
+            const select = document.getElementById('selectCliente');
+            const clientes = [...new Set(data.map(item => item.Cliente))].sort();
+            clientes.forEach(c => select.appendChild(new Option(c, c)));
+
+            function actualizarGrafico(cliente) {
+                const totales = {};
+                data.filter(d => d.Cliente === cliente).forEach(item => totales[item.Rubro] = (totales[item.Rubro] || 0) + item.Cantidad);
+                const labels = Object.keys(totales).sort((a, b) => totales[b] - totales[a]);
+                if (chartComposicionInstance) chartComposicionInstance.destroy();
+                chartComposicionInstance = new Chart(document.getElementById('chartComposicion'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: labels.map(l => totales[l]), backgroundColor: ['#2F5597', '#E65100', '#4CAF50', '#FFC107', '#9C27B0', '#00BCD4'] }] }, options: { responsive: true, plugins: { legend: { position: 'right' } } } });
+            }
+            if (clientes.length > 0) actualizarGrafico(clientes[0]);
+            select.addEventListener('change', (e) => actualizarGrafico(e.target.value));
+        }
+
+        function generarGraficoInteranual(data) {
+            const dataPorAño = {};
+            data.forEach(item => { const [mes, año] = item.Periodo.split('/'); if (!dataPorAño[año]) dataPorAño[año] = {}; dataPorAño[año][mes] = (dataPorAño[año][mes] || 0) + item.Cantidad; });
+            const años = Object.keys(dataPorAño).sort();
+            const datasets = años.map((año, idx) => ({ label: `Año ${año}`, data: ['01','02','03','04','05','06','07','08','09','10','11','12'].map(mes => dataPorAño[año][mes] || null), borderColor: ['#2F5597', '#E65100', '#4CAF50', '#9C27B0'][idx % 4], tension: 0.3, borderWidth: 3 }));
+            new Chart(document.getElementById('chartInteranual'), { type: 'line', data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], datasets: datasets }, options: { responsive: true, plugins: { title: { display: true, text: 'Estacionalidad Interanual', font: { size: 16 } } } } });
+        }
+
+        // --- NUEVO REPORTE: MES A MES VS TARGET POR VENDEDOR ---
+        let chartTargetsInstance = null;
+        function generarGraficoTargetsMensual(ventas, targets_dict) {
+            const selCliente = document.getElementById('selectClienteTarget');
+            const selRubro = document.getElementById('selectRubroTarget');
+            const inputVendedores = document.getElementById('inputVendedores');
+            
+            const clientes = [...new Set(ventas.map(v => v.Cliente))].sort();
+            clientes.forEach(c => selCliente.appendChild(new Option(c, c)));
+
+            function poblarRubros(cliente) {
+                selRubro.innerHTML = '';
+                const rubrosCliente = [...new Set(ventas.filter(v => v.Cliente === cliente).map(v => v.Rubro))].sort();
+                rubrosCliente.forEach(r => selRubro.appendChild(new Option(r, r)));
+                if(rubrosCliente.length > 0) actualizarGrafico(cliente, rubrosCliente[0]);
+            }
+
+            function actualizarGrafico(cliente, rubro) {
+                // Obtener y validar el número de vendedores (nunca puede ser 0 o menor)
+                const numVendedores = Math.max(1, parseInt(inputVendedores.value) || 1);
+
+                const datos = ventas.filter(v => v.Cliente === cliente && v.Rubro === rubro);
+                const totalesPorMes = {};
+                datos.forEach(d => totalesPorMes[d.Periodo] = (totalesPorMes[d.Periodo] || 0) + d.Cantidad);
+
+                // Ordenar meses cronológicamente
+                const periodosOrdenados = Object.keys(totalesPorMes).sort((a, b) => { 
+                    const [mA, yA] = a.split('/'); 
+                    const [mB, yB] = b.split('/'); 
+                    return new Date(yA, mA - 1) - new Date(yB, mB - 1); 
+                });
+
+                // Dividir la venta real total por la cantidad de vendedores elegida (redondeado a 2 decimales)
+                const valuesCantidadPromedio = periodosOrdenados.map(p => parseFloat((totalesPorMes[p] / numVendedores).toFixed(2)));
+                
+                // Obtener el target desde el diccionario (si no existe, es 0)
+                const targetMensual = targets_dict[rubro] || 0;
+                const valuesTarget = periodosOrdenados.map(() => targetMensual); 
+
+                if (chartTargetsInstance) chartTargetsInstance.destroy();
+
+                chartTargetsInstance = new Chart(document.getElementById('chartTargets'), {
+                    type: 'bar',
+                    data: {
+                        labels: periodosOrdenados,
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: `Venta Real Promedio (Total ÷ ${numVendedores} Vend.)`,
+                                data: valuesCantidadPromedio,
+                                backgroundColor: '#4CAF50',
+                                borderRadius: 4,
+                                order: 2
+                            },
+                            {
+                                type: 'line',
+                                label: `Objetivo Mensual por Vendedor (${targetMensual})`,
+                                data: valuesTarget,
+                                borderColor: '#E65100',
+                                borderDash: [5, 5],
+                                borderWidth: 3,
+                                pointRadius: 0,
+                                fill: false,
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: { 
+                        responsive: true, 
+                        plugins: { title: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            // Listeners de los selectores
+            selCliente.addEventListener('change', (e) => poblarRubros(e.target.value));
+            selRubro.addEventListener('change', (e) => actualizarGrafico(selCliente.value, e.target.value));
+            
+            // Listener para el input de Vendedores (se actualiza automáticamente al escribir/hacer clic)
+            inputVendedores.addEventListener('input', () => actualizarGrafico(selCliente.value, selRubro.value));
+
+            // Iniciar la vista
+            if(clientes.length > 0) poblarRubros(clientes[0]);
+        }
+    </script>
+</body>
+</html>
