@@ -3,22 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Vanguard</title>
+    <title>Dashboard Comercial - Vanguard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg-color: #f4f7fa; --card-bg: #ffffff; --text-main: #333; --accent: #2F5597; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; }
-        header { margin-bottom: 30px; padding-bottom: 10px; border-bottom: 2px solid var(--accent); }
-        h1 { margin: 0; color: var(--accent); }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px; }
-        .card { background-color: var(--card-bg); border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; }
-        .card.full-width { grid-column: 1 / -1; }
-        canvas { max-height: 350px; width: 100%; }
-        .control-panel { width: 100%; text-align: center; margin-bottom: 15px; }
-        .selectors-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
-        select, input[type="number"] { padding: 8px 15px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; font-weight: bold; color: var(--accent); cursor: pointer; background-color: #fff; outline: none; max-width: 300px; }
-        input[type="number"] { border-color: #E65100; color: #E65100; text-align: center; width: 70px; }
-        .label-control { font-size: 14px; font-weight: bold; color: #666; }
+        /* Diseño oscuro y moderno */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        h1 {
+            color: #66b3ff;
+            margin: 0 0 10px 0;
+        }
+        h3 {
+            color: #ccc;
+            text-align: center;
+        }
+        
+        /* Grilla del Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background-color: #242424;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        /* Estilos de tabla en la card */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #ccc;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            color: #fff;
+            border-bottom: 2px solid #555;
+        }
     </style>
 </head>
 <body>
@@ -27,219 +71,285 @@
         <h1>Vanguard | Análisis de Salidas y Targets Mensuales</h1>
         <p>Seguimiento de cuotas mensuales y evolución de mercado.</p>
     </header>
-    <div class="card full-width">
-    <h3>⚠️ Clientes en Riesgo (Más de 60 días sin actividad)</h3>
-    <table id="tablaRiesgo" style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead>
-            <tr style="border-bottom: 2px solid #ccc;">
-                <th style="padding: 10px;">Cliente</th>
-                <th style="padding: 10px;">Última Compra</th>
-                <th style="padding: 10px;">Días Inactivo</th>
-            </tr>
-        </thead>
-        <tbody id="bodyRiesgo"></tbody>
-    </table>
-</div>
-    <div class="grid-container">
-        <div class="card"><canvas id="chartClientes"></canvas></div>
-        <div class="card"><canvas id="chartEvolucion"></canvas></div>
 
-        <div class="card"><canvas id="chartTopRubros"></canvas></div>
+    <div class="card full-width">
+        <h3 style="color: #ffcc00; margin-bottom: 15px;">⚠️ Clientes en Riesgo (Más de 60 días sin actividad)</h3>
+        <table id="tablaRiesgo">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Última Compra</th>
+                    <th>Días Inactivo</th>
+                </tr>
+            </thead>
+            <tbody id="bodyRiesgo">
+                </tbody>
+        </table>
+    </div>
+
+    <div class="dashboard-grid" style="margin-top: 20px;">
+        
         <div class="card">
-            <div class="control-panel">
-                <span style="font-size: 16px; font-weight: bold; color: #666;">Composición por Cliente</span>
-                <div class="selectors-container"><select id="selectCliente"></select></div>
-            </div>
-            <canvas id="chartComposicion"></canvas>
+            <h3>Resumen por Clientes</h3>
+            <canvas id="chartClientes"></canvas>
         </div>
 
-        <div class="card full-width">
-            <div class="control-panel">
-                <span style="font-size: 18px; font-weight: bold; color: #2F5597;">Evaluación de Objetivo Mensual (Target por Vendedor)</span>
-                <p style="margin: 5px 0 0 0; font-size: 14px; color: #666;">Ajuste la cantidad de vendedores para calcular la venta real promedio por persona y auditar el objetivo.</p>
-                <div class="selectors-container">
-                    <span class="label-control">Cliente:</span>
-                    <select id="selectClienteTarget"></select>
-                    
-                    <span class="label-control" style="margin-left: 10px;">Producto:</span>
-                    <select id="selectRubroTarget"></select>
-                    
-                    <span class="label-control" style="color: #E65100; margin-left: 20px;">Cant. Vendedores:</span>
-                    <input type="number" id="inputVendedores" value="1" min="1" step="1">
-                </div>
-            </div>
+        <div class="card">
+            <h3>Evolución Mensual Global</h3>
+            <canvas id="chartEvolucion"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Composición por Rubro</h3>
+            <canvas id="chartRubros"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Análisis Target (Target vs Realidad)</h3>
             <canvas id="chartTargets"></canvas>
         </div>
 
-        <div class="card full-width"><canvas id="chartInteranual"></canvas></div>
+        <div class="card full-width">
+            <h3 style="color: #fff; margin-bottom: 15px;">Índice de Penetración de Catálogo (%)</h3>
+            <canvas id="chartPenetracion" height="100"></canvas>
+        </div>
+
     </div>
 
     <script>
-        fetch('datos_dashboard.json')
-            .then(response => response.json())
-            .then(data => {
-                const ventas = data.ventas;
-                const targets = data.targets;
-
-                generarGraficoClientes(ventas);
-                generarGraficoEvolucion(ventas);
-                generarGraficoTopRubros(ventas);
-                generarGraficoComposicionCliente(ventas);
-                generarGraficoInteranual(ventas);
-                
-                // Ejecutamos el reporte mensual con el nuevo parámetro de vendedores
-                generarGraficoTargetsMensual(ventas, targets);
-            })
-            .catch(error => console.error("Error cargando los datos:", error));
-
-        function generarGraficoClientes(data) {
-            const totales = {}; data.forEach(item => totales[item.Cliente] = (totales[item.Cliente] || 0) + item.Cantidad);
-            const sortedClientes = Object.keys(totales).sort((a, b) => totales[b] - totales[a]);
-            new Chart(document.getElementById('chartClientes'), { type: 'bar', data: { labels: sortedClientes, datasets: [{ label: 'Total Comprado', data: sortedClientes.map(c => totales[c]), backgroundColor: '#2F5597', borderRadius: 4 }] }, options: { responsive: true, plugins: { title: { display: true, text: 'Resumen por Clientes', font: { size: 16 } } } } });
+        // Función para agregar colores automáticos
+        function generarColores(cantidad) {
+            const paleta = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#59a14f', '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab'];
+            let colores = [];
+            for (let i=0; i<cantidad; i++) { colores.push(paleta[i % paleta.length]); }
+            return colores;
         }
 
-        function generarGraficoEvolucion(data) {
-            const totales = {}; data.forEach(item => totales[item.Periodo] = (totales[item.Periodo] || 0) + item.Cantidad);
-            const sortedPeriodos = Object.keys(totales).sort((a, b) => { const [mA, yA] = a.split('/'); const [mB, yB] = b.split('/'); return new Date(yA, mA - 1) - new Date(yB, mB - 1); });
-            new Chart(document.getElementById('chartEvolucion'), { type: 'line', data: { labels: sortedPeriodos, datasets: [{ label: 'Tendencia Global', data: sortedPeriodos.map(p => totales[p]), borderColor: '#E65100', backgroundColor: 'rgba(230, 81, 0, 0.1)', fill: true, tension: 0.3 }] }, options: { responsive: true, plugins: { title: { display: true, text: 'Evolución Mensual Global', font: { size: 16 } } } } });
-        }
-
-        function generarGraficoTopRubros(data) {
-            const totales = {}; data.forEach(item => totales[item.Rubro] = (totales[item.Rubro] || 0) + item.Cantidad);
-            const topRubros = Object.keys(totales).sort((a, b) => totales[b] - totales[a]).slice(0, 10);
-            new Chart(document.getElementById('chartTopRubros'), { type: 'bar', data: { labels: topRubros, datasets: [{ label: 'Cantidad', data: topRubros.map(r => totales[r]), backgroundColor: '#4CAF50', borderRadius: 4 }] }, options: { indexAxis: 'y', responsive: true, plugins: { title: { display: true, text: 'Top 10 Rubros', font: { size: 16 } } } } });
-        }
-
-        let chartComposicionInstance = null;
-        function generarGraficoComposicionCliente(data) {
-            const select = document.getElementById('selectCliente');
-            const clientes = [...new Set(data.map(item => item.Cliente))].sort();
-            clientes.forEach(c => select.appendChild(new Option(c, c)));
-
-            function actualizarGrafico(cliente) {
-                const totales = {};
-                data.filter(d => d.Cliente === cliente).forEach(item => totales[item.Rubro] = (totales[item.Rubro] || 0) + item.Cantidad);
-                const labels = Object.keys(totales).sort((a, b) => totales[b] - totales[a]);
-                if (chartComposicionInstance) chartComposicionInstance.destroy();
-                chartComposicionInstance = new Chart(document.getElementById('chartComposicion'), { type: 'doughnut', data: { labels: labels, datasets: [{ data: labels.map(l => totales[l]), backgroundColor: ['#2F5597', '#E65100', '#4CAF50', '#FFC107', '#9C27B0', '#00BCD4'] }] }, options: { responsive: true, plugins: { legend: { position: 'right' } } } });
-            }
-            if (clientes.length > 0) actualizarGrafico(clientes[0]);
-            select.addEventListener('change', (e) => actualizarGrafico(e.target.value));
-        }
-
-        function generarGraficoInteranual(data) {
-            const dataPorAño = {};
-            data.forEach(item => { const [mes, año] = item.Periodo.split('/'); if (!dataPorAño[año]) dataPorAño[año] = {}; dataPorAño[año][mes] = (dataPorAño[año][mes] || 0) + item.Cantidad; });
-            const años = Object.keys(dataPorAño).sort();
-            const datasets = años.map((año, idx) => ({ label: `Año ${año}`, data: ['01','02','03','04','05','06','07','08','09','10','11','12'].map(mes => dataPorAño[año][mes] || null), borderColor: ['#2F5597', '#E65100', '#4CAF50', '#9C27B0'][idx % 4], tension: 0.3, borderWidth: 3 }));
-            new Chart(document.getElementById('chartInteranual'), { type: 'line', data: { labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'], datasets: datasets }, options: { responsive: true, plugins: { title: { display: true, text: 'Estacionalidad Interanual', font: { size: 16 } } } } });
-        }
-
-        // --- NUEVO REPORTE: MES A MES VS TARGET POR VENDEDOR ---
-        let chartTargetsInstance = null;
-        function generarGraficoTargetsMensual(ventas, targets_dict) {
-            const selCliente = document.getElementById('selectClienteTarget');
-            const selRubro = document.getElementById('selectRubroTarget');
-            const inputVendedores = document.getElementById('inputVendedores');
+        // ==========================================
+        // 1. Gráfico: Resumen de Clientes (Barra)
+        // ==========================================
+        function generarChartClientes(datos) {
+            const agrupado = {};
+            datos.forEach(d => { agrupado[d.Cliente] = (agrupado[d.Cliente] || 0) + d.Cantidad; });
+            const ordenados = Object.entries(agrupado).sort((a,b) => b[1] - a[1]);
             
-            const clientes = [...new Set(ventas.map(v => v.Cliente))].sort();
-            clientes.forEach(c => selCliente.appendChild(new Option(c, c)));
-
-            function poblarRubros(cliente) {
-                selRubro.innerHTML = '';
-                const rubrosCliente = [...new Set(ventas.filter(v => v.Cliente === cliente).map(v => v.Rubro))].sort();
-                rubrosCliente.forEach(r => selRubro.appendChild(new Option(r, r)));
-                if(rubrosCliente.length > 0) actualizarGrafico(cliente, rubrosCliente[0]);
-            }
-
-            function actualizarGrafico(cliente, rubro) {
-                // Obtener y validar el número de vendedores (nunca puede ser 0 o menor)
-                const numVendedores = Math.max(1, parseInt(inputVendedores.value) || 1);
-
-                const datos = ventas.filter(v => v.Cliente === cliente && v.Rubro === rubro);
-                const totalesPorMes = {};
-                datos.forEach(d => totalesPorMes[d.Periodo] = (totalesPorMes[d.Periodo] || 0) + d.Cantidad);
-
-                // Ordenar meses cronológicamente
-                const periodosOrdenados = Object.keys(totalesPorMes).sort((a, b) => { 
-                    const [mA, yA] = a.split('/'); 
-                    const [mB, yB] = b.split('/'); 
-                    return new Date(yA, mA - 1) - new Date(yB, mB - 1); 
-                });
-
-                // Dividir la venta real total por la cantidad de vendedores elegida (redondeado a 2 decimales)
-                const valuesCantidadPromedio = periodosOrdenados.map(p => parseFloat((totalesPorMes[p] / numVendedores).toFixed(2)));
-                
-                // Obtener el target desde el diccionario (si no existe, es 0)
-                const targetMensual = targets_dict[rubro] || 0;
-                const valuesTarget = periodosOrdenados.map(() => targetMensual); 
-
-                if (chartTargetsInstance) chartTargetsInstance.destroy();
-
-                chartTargetsInstance = new Chart(document.getElementById('chartTargets'), {
-                    type: 'bar',
-                    data: {
-                        labels: periodosOrdenados,
-                        datasets: [
-                            {
-                                type: 'bar',
-                                label: `Venta Real Promedio (Total ÷ ${numVendedores} Vend.)`,
-                                data: valuesCantidadPromedio,
-                                backgroundColor: '#4CAF50',
-                                borderRadius: 4,
-                                order: 2
-                            },
-                            {
-                                type: 'line',
-                                label: `Objetivo Mensual por Vendedor (${targetMensual})`,
-                                data: valuesTarget,
-                                borderColor: '#E65100',
-                                borderDash: [5, 5],
-                                borderWidth: 3,
-                                pointRadius: 0,
-                                fill: false,
-                                order: 1
-                            }
-                        ]
-                    },
-                    options: { 
-                        responsive: true, 
-                        plugins: { title: { display: false } },
-                        scales: { y: { beginAtZero: true } }
-                    }
-                });
-            }
-
-            // Listeners de los selectores
-            selCliente.addEventListener('change', (e) => poblarRubros(e.target.value));
-            selRubro.addEventListener('change', (e) => actualizarGrafico(selCliente.value, e.target.value));
-            
-            // Listener para el input de Vendedores (se actualiza automáticamente al escribir/hacer clic)
-            inputVendedores.addEventListener('input', () => actualizarGrafico(selCliente.value, selRubro.value));
-
-            // Iniciar la vista
-            if(clientes.length > 0) poblarRubros(clientes[0]);
+            new Chart(document.getElementById('chartClientes'), {
+                type: 'bar',
+                data: {
+                    labels: ordenados.map(i => i[0]),
+                    datasets: [{
+                        label: 'Total Comprado',
+                        data: ordenados.map(i => i[1]),
+                        backgroundColor: '#4e79a7'
+                    }]
+                },
+                options: { scales: { y: { grid: {color: '#333'} }, x: { grid: {color: '#333'} } }, plugins: { legend: { labels: { color: '#fff' } } } }
+            });
         }
-        // Función para mostrar la tabla de riesgo
+
+        // ==========================================
+        // 2. Gráfico: Evolución Global (Línea)
+        // ==========================================
+        function generarChartEvolucion(datos) {
+            const agrupado = {};
+            datos.forEach(d => {
+                const parts = d.Periodo.split('/');
+                const fechaFormat = parts[1] + '-' + parts[0]; 
+                agrupado[fechaFormat] = (agrupado[fechaFormat] || 0) + d.Cantidad;
+            });
+            const ordenados = Object.entries(agrupado).sort((a,b) => a[0].localeCompare(b[0]));
+
+            new Chart(document.getElementById('chartEvolucion'), {
+                type: 'line',
+                data: {
+                    labels: ordenados.map(i => {
+                        let p = i[0].split('-');
+                        return p[1] + '/' + p[0];
+                    }),
+                    datasets: [{
+                        label: 'Tendencia Global',
+                        data: ordenados.map(i => i[1]),
+                        borderColor: '#f28e2c',
+                        backgroundColor: 'rgba(242, 142, 44, 0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { scales: { y: { grid: {color: '#333'} }, x: { grid: {color: '#333'} } }, plugins: { legend: { labels: { color: '#fff' } } } }
+            });
+        }
+
+        // ==========================================
+        // 3. Gráfico: Composición por Rubro (Doughnut)
+        // ==========================================
+        function generarChartRubros(datos) {
+            const agrupado = {};
+            datos.forEach(d => { agrupado[d.Rubro] = (agrupado[d.Rubro] || 0) + d.Cantidad; });
+            const ordenados = Object.entries(agrupado).sort((a,b) => b[1] - a[1]);
+
+            new Chart(document.getElementById('chartRubros'), {
+                type: 'doughnut',
+                data: {
+                    labels: ordenados.map(i => i[0]),
+                    datasets: [{
+                        data: ordenados.map(i => i[1]),
+                        backgroundColor: generarColores(ordenados.length),
+                        borderColor: '#1a1a1a',
+                        borderWidth: 2
+                    }]
+                },
+                options: { plugins: { legend: { position: 'right', labels: { color: '#fff' } } } }
+            });
+        }
+
+        // ==========================================
+        // 4. Gráfico: Análisis Target Mensual Promedio
+        // ==========================================
+        function generarChartTargets(datos, targetsDict) {
+            const rubroMes = {};
+            datos.forEach(d => {
+                if (!rubroMes[d.Rubro]) rubroMes[d.Rubro] = new Set();
+                rubroMes[d.Rubro].add(d.Periodo);
+            });
+
+            const rubroCantidades = {};
+            datos.forEach(d => {
+                rubroCantidades[d.Rubro] = (rubroCantidades[d.Rubro] || 0) + d.Cantidad;
+            });
+
+            const labels = [];
+            const dataPromedioMensual = [];
+            const dataTarget = [];
+
+            for (const rubro in targetsDict) {
+                const targetValor = targetsDict[rubro];
+                if (targetValor > 0) { 
+                    const totalVendido = rubroCantidades[rubro] || 0;
+                    const mesesActivos = rubroMes[rubro] ? rubroMes[rubro].size : 1;
+                    const promedio = mesesActivos > 0 ? (totalVendido / mesesActivos) : 0;
+                    
+                    labels.push(rubro);
+                    dataPromedioMensual.push(promedio.toFixed(1));
+                    dataTarget.push(targetValor);
+                }
+            }
+
+            new Chart(document.getElementById('chartTargets'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Promedio Mensual Real',
+                            data: dataPromedioMensual,
+                            backgroundColor: '#59a14f'
+                        },
+                        {
+                            label: 'Target Mensual Esperado',
+                            data: dataTarget,
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            type: 'line',
+                            borderColor: '#ff6384',
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: { scales: { y: { grid: {color: '#333'} }, x: { grid: {color: '#333'} } }, plugins: { legend: { labels: { color: '#fff' } } } }
+            });
+        }
+
+        // ==========================================
+        // 5. Tabla: Clientes en Riesgo
+        // ==========================================
         function generarTablaRiesgo(clientes) {
             const tbody = document.getElementById('bodyRiesgo');
-            tbody.innerHTML = '';
+            tbody.innerHTML = ''; // Limpiamos tabla
+            
+            if (!clientes || clientes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #76b7b2;">Todos los clientes están activos.</td></tr>';
+                return;
+            }
+
             clientes.forEach(c => {
                 const row = `<tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${c.Cliente}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${c.Fecha_Ultima}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #eee; color: red; font-weight: bold;">${c.Dias_Inactividad} días</td>
+                    <td>${c.Cliente}</td>
+                    <td>${c.Fecha_Ultima}</td>
+                    <td style="color: #e15759; font-weight: bold;">${c.Dias_Inactividad} días</td>
                 </tr>`;
                 tbody.innerHTML += row;
             });
         }
 
-        // Llamar a la función al recibir los datos
+        // ==========================================
+        // 6. Gráfico: Índice de Penetración de Catálogo
+        // ==========================================
+        function generarChartPenetracion(datos) {
+            const ctx = document.getElementById('chartPenetracion').getContext('2d');
+            const labels = datos.map(d => d.Cliente);
+            const dataPorcentaje = datos.map(d => d.Penetracion_Porcentaje);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '% del Catálogo Comprado',
+                        data: dataPorcentaje,
+                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Lo hace horizontal
+                    responsive: true,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#333' },
+                            ticks: { color: '#ccc' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#ccc' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // CARGA Y EJECUCIÓN PRINCIPAL
+        // ==========================================
         fetch('datos_dashboard.json')
             .then(response => response.json())
             .then(data => {
-                // ... (tus otras funciones aquí)
-                generarTablaRiesgo(data.clientes_riesgo);
+                // Ejecutamos todos los gráficos con los datos
+                if(data.ventas) {
+                    generarChartClientes(data.ventas);
+                    generarChartEvolucion(data.ventas);
+                    generarChartRubros(data.ventas);
+                }
+                if(data.ventas && data.targets) {
+                    generarChartTargets(data.ventas, data.targets);
+                }
+                if(data.clientes_riesgo) {
+                    generarTablaRiesgo(data.clientes_riesgo);
+                }
+                if(data.penetracion) {
+                    generarChartPenetracion(data.penetracion);
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar los datos:", error);
+                document.body.innerHTML += `<p style="color:red; text-align:center;">Error cargando el archivo de datos JSON.</p>`;
             });
     </script>
 </body>
