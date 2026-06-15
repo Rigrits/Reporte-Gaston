@@ -27,7 +27,19 @@
         <h1>Vanguard | Análisis de Salidas y Targets Mensuales</h1>
         <p>Seguimiento de cuotas mensuales y evolución de mercado.</p>
     </header>
-
+    <div class="card full-width">
+    <h3>⚠️ Clientes en Riesgo (Más de 60 días sin actividad)</h3>
+    <table id="tablaRiesgo" style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="border-bottom: 2px solid #ccc;">
+                <th style="padding: 10px;">Cliente</th>
+                <th style="padding: 10px;">Última Compra</th>
+                <th style="padding: 10px;">Días Inactivo</th>
+            </tr>
+        </thead>
+        <tbody id="bodyRiesgo"></tbody>
+    </table>
+</div>
     <div class="grid-container">
         <div class="card"><canvas id="chartClientes"></canvas></div>
         <div class="card"><canvas id="chartEvolucion"></canvas></div>
@@ -208,6 +220,27 @@
             // Iniciar la vista
             if(clientes.length > 0) poblarRubros(clientes[0]);
         }
+        // Función para mostrar la tabla de riesgo
+        function generarTablaRiesgo(clientes) {
+            const tbody = document.getElementById('bodyRiesgo');
+            tbody.innerHTML = '';
+            clientes.forEach(c => {
+                const row = `<tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${c.Cliente}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${c.Fecha_Ultima}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; color: red; font-weight: bold;">${c.Dias_Inactividad} días</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // Llamar a la función al recibir los datos
+        fetch('datos_dashboard.json')
+            .then(response => response.json())
+            .then(data => {
+                // ... (tus otras funciones aquí)
+                generarTablaRiesgo(data.clientes_riesgo);
+            });
     </script>
 </body>
 </html>
