@@ -38,7 +38,16 @@
     <div class="dashboard-grid" style="margin-top: 20px;">
         <div class="card"><h3>Resumen por Clientes</h3><canvas id="chartClientes"></canvas></div>
         <div class="card"><h3>Evolución Mensual Global</h3><canvas id="chartEvolucion"></canvas></div>
-        <div class="card"><h3>Composición por Rubro</h3><canvas id="chartRubros"></canvas></div>
+        
+        <div class="card"><h3>Composición Global por Rubro</h3><canvas id="chartRubros"></canvas></div>
+
+        <div class="card">
+            <h3>Proporción de Rubros (Por Cliente)</h3>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <label>Cliente: <select id="selectClientePastel"></select></label>
+            </div>
+            <canvas id="chartRubrosClientePastel"></canvas>
+        </div>
 
         <div class="card full-width">
             <h3>Análisis Mensual de Target por Cliente</h3>
@@ -59,6 +68,7 @@
     <script>
         let datosGlobales = null;
         let chartTargetClienteInstance = null;
+        let chartRubrosClienteInstance = null; // Variable para el nuevo gráfico pastel
 
         function generarColores(cantidad) {
             const paleta = ['#4e79a7', '#f28e2c', '#e15759', '#76b7b2', '#59a14f', '#edc949', '#af7aa1', '#ff9da7', '#9c755f', '#bab0ab'];
@@ -105,8 +115,44 @@
         }
 
         // ==========================================
-        // DINÁMICO MEJORADO: Ahora evalúa un MES exacto
+        // NUEVA FUNCIÓN: Gráfico Pastel Dinámico por Cliente
         // ==========================================
+        function actualizarChartPastelCliente() {
+            if (!datosGlobales || !datosGlobales.ventas) return;
+
+            const clienteSeleccionado = document.getElementById('selectClientePastel').value;
+            const ventasCliente = datosGlobales.ventas.filter(d => d.Cliente === clienteSeleccionado);
+
+            const agrupado = {};
+            ventasCliente.forEach(d => {
+                agrupado[d.Rubro] = (agrupado[d.Rubro] || 0) + d.Cantidad;
+            });
+
+            // Ordenamos de mayor a menor para que el gráfico quede más estético
+            const ordenados = Object.entries(agrupado).sort((a,b) => b[1] - a[1]);
+
+            const ctx = document.getElementById('chartRubrosClientePastel').getContext('2d');
+            if (chartRubrosClienteInstance) chartRubrosClienteInstance.destroy();
+
+            chartRubrosClienteInstance = new Chart(ctx, {
+                type: 'pie', // Estilo pastel
+                data: {
+                    labels: ordenados.map(i => i[0]),
+                    datasets: [{
+                        data: ordenados.map(i => i[1]),
+                        backgroundColor: generarColores(ordenados.length),
+                        borderColor: '#1a1a1a',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#fff' } }
+                    }
+                }
+            });
+        }
+
         function actualizarChartTargetCliente() {
             if (!datosGlobales || !datosGlobales.ventas || !datosGlobales.targets) return;
 
@@ -114,7 +160,6 @@
             const mesSeleccionado = document.getElementById('selectMesTarget').value;
             const numVendedores = parseInt(document.getElementById('inputVendedores').value) || 1;
 
-            // Filtramos las ventas de ESE cliente en ESE mes específico
             const ventasMesCliente = datosGlobales.ventas.filter(d => 
                 d.Cliente === clienteSeleccionado && d.Periodo === mesSeleccionado
             );
@@ -132,8 +177,6 @@
                 const targetValor = datosGlobales.targets[rubro];
                 if (targetValor > 0) {
                     const totalVendidoMes = rubroCantidades[rubro] || 0;
-                    
-                    // Calculamos cuánto vendió en promedio cada vendedor ESE mes
                     const ventaPorVendedor = totalVendidoMes / numVendedores;
 
                     labels.push(rubro);
@@ -150,20 +193,8 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: `Venta por Vendedor (${mesSeleccionado})`,
-                            data: dataVentaPorVendedor,
-                            backgroundColor: '#66b3ff'
-                        },
-                        {
-                            label: 'Target Esperado',
-                            data: dataTargetIndividual,
-                            type: 'line',
-                            borderColor: '#ff6384',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false
-                        }
+                        { label: `Venta por Vendedor (${mesSeleccionado})`, data: dataVentaPorVendedor, backgroundColor: '#66b3ff' },
+                        { label: 'Target Esperado', data: dataTargetIndividual, type: 'line', borderColor: '#ff6384', borderWidth: 2, borderDash: [5, 5], fill: false }
                     ]
                 },
                 options: {
@@ -206,12 +237,17 @@
                     generarChartEvolucion(data.ventas);
                     generarChartRubros(data.ventas);
 
-                    // Llenar Select de Clientes
                     const clientesUnicos = [...new Set(data.ventas.map(d => d.Cliente))].sort();
-                    const selectC = document.getElementById('selectClienteTarget');
-                    clientesUnicos.forEach(c => selectC.innerHTML += `<option value="${c}">${c}</option>`);
+                    
+                    // Llenar Select de Clientes para el Target
+                    const selectCTarget = document.getElementById('selectClienteTarget');
+                    clientesUnicos.forEach(c => selectCTarget.innerHTML += `<option value="${c}">${c}</option>`);
 
-                    // Llenar Select de Meses (Ordenados del más nuevo al más viejo)
+                    // Llenar Select de Clientes para el Pastel Nuevo
+                    const selectCPastel = document.getElementById('selectClientePastel');
+                    clientesUnicos.forEach(c => selectCPastel.innerHTML += `<option value="${c}">${c}</option>`);
+
+                    // Llenar Select de Meses
                     const mesesUnicos = [...new Set(data.ventas.map(d => d.Periodo))].sort((a,b) => {
                         let pa = a.split('/'); let pb = b.split('/');
                         return new Date(pb[1], pb[0]-1) - new Date(pa[1], pa[0]-1);
@@ -220,12 +256,16 @@
                     mesesUnicos.forEach(m => selectM.innerHTML += `<option value="${m}">${m}</option>`);
 
                     // Escuchadores
-                    selectC.addEventListener('change', actualizarChartTargetCliente);
+                    selectCTarget.addEventListener('change', actualizarChartTargetCliente);
                     selectM.addEventListener('change', actualizarChartTargetCliente);
                     document.getElementById('inputVendedores').addEventListener('input', actualizarChartTargetCliente);
+                    
+                    // Escuchador para el nuevo pastel
+                    selectCPastel.addEventListener('change', actualizarChartPastelCliente);
 
-                    // Inicializar
+                    // Inicializar los gráficos dinámicos
                     actualizarChartTargetCliente();
+                    actualizarChartPastelCliente();
                 }
                 if(data.clientes_riesgo) generarTablaRiesgo(data.clientes_riesgo);
                 if(data.penetracion) generarChartPenetracion(data.penetracion);
